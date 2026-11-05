@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Nazoratchi</title>
+  <meta name="description" content="Test paytida varaq almashtirish, Alt+Tab va to‘liq ekrandan chiqishni aniqlaydigan onlayn test sayti.">
+  <meta name="color-scheme" content="light dark">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..125,500..900&family=JetBrains+Mono:wght@500;700&family=Public+Sans:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="top">
+      <div class="wrap top-in">
+        <span class="brand">Nazoratchi</span>
+        <div class="top-right">
+          <div class="hud" id="hud" hidden>
+            <span><span class="hud-label">Qoldi</span><span class="hud-time" id="hud-time" data-low="0">00:00</span></span>
+            <span class="hud-viol" id="hud-viol-wrap" data-level="ok"><span class="hud-label">Ogohlantirish</span><span id="hud-viol">0 / 3</span></span>
+          </div>
+          <div class="presence" data-presence data-state="here" role="status">
+            <span class="dot" aria-hidden="true"></span>
+            <span data-presence-text>Siz saytdasiz</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <!-- Boshlash -->
+      <section id="view-start" class="start">
+        <div class="start-main">
+          <p class="eyebrow">Onlayn test</p>
+          <h1 id="exam-title">Umumiy bilim testi</h1>
+          <ul class="facts" id="facts"></ul>
+
+          <form id="start-form" class="card form" novalidate>
+            <label for="name">Ism va familiya</label>
+            <input id="name" name="name" type="text" autocomplete="name" maxlength="60" placeholder="Masalan: Aziza Karimova" required>
+            <label for="group">Guruh yoki sinf <span class="opt">(ixtiyoriy)</span></label>
+            <input id="group" name="group" type="text" autocomplete="off" maxlength="30" placeholder="Masalan: 9-B">
+            <p id="start-error" class="error" role="alert" hidden></p>
+            <button class="btn primary" type="submit">Testni boshlash</button>
+          </form>
+
+          <div class="rules">
+            <h2>Qoidalar</h2>
+            <ul>
+              <li>Test davomida boshqa varaq yoki oynaga o‘tmang.</li>
+              <li>To‘liq ekran rejimida qoling.</li>
+              <li>Nusxa olish, o‘ng tugma va F12 taqiqlangan.</li>
+              <li><span id="rule-limit">3</span> marta chiqib ketsangiz, test to‘xtatiladi.</li>
+              <li>Sahifani yangilasangiz, vaqt to‘xtamaydi va bu qoidabuzarlik sifatida yoziladi.</li>
+            </ul>
+          </div>
+        </div>
+
+        <aside class="start-side">
+          <div class="presence-card" data-presence data-state="here">
+            <p class="label">Holat</p>
+            <p class="presence-big"><span class="dot" aria-hidden="true"></span><span data-presence-text>Siz saytdasiz</span></p>
+            <dl class="onsite">
+              <dt>Sahifada</dt>
+              <dd id="onsite">00:00</dd>
+            </dl>
+            <hr>
+            <h2>Sinab ko‘ring</h2>
+            <p>Yangi varaq oching yoki Alt+Tab bosing, so‘ng shu yerga qayting. Tizim buni darhol aniqlaydi.</p>
+            <p class="hint">Test boshlanmaguncha bu faqat sinov: hisobga olinmaydi.</p>
+          </div>
+        </aside>
+      </section>
+
+      <!-- Test -->
+      <section id="view-test" class="test no-select" hidden>
+        <div class="card q-card">
+          <p class="q-pos" id="q-pos">Savol 1 / 1</p>
+          <h2 class="q-text" id="q-text"></h2>
+          <ul class="options" id="options" aria-label="Javob variantlari"></ul>
+          <div class="q-nav">
+            <button class="btn" id="prev" type="button">Oldingi</button>
+            <button class="btn" id="next" type="button">Keyingi</button>
+            <button class="btn primary push" id="finish-btn" type="button">Yakunlash</button>
+          </div>
+          <div class="finish-bar" id="finish-bar" hidden>
+            <p id="finish-text"></p>
+            <div class="finish-actions">
+              <button class="btn danger" id="finish-yes" type="button">Ha, yakunlash</button>
+              <button class="btn" id="finish-no" type="button">Qaytish</button>
+            </div>
+          </div>
+        </div>
+
+        <aside class="side">
+          <section class="card">
+            <h2 class="side-h">Javoblar varag‘i</h2>
+            <div class="sheet" id="sheet"></div>
+            <p class="muted" id="sheet-count"></p>
+          </section>
+          <section class="card">
+            <h2 class="side-h">Qoidabuzarliklar</h2>
+            <p class="muted" id="log-empty">Hozircha yo‘q.</p>
+            <ol class="log" id="log"></ol>
+          </section>
+        </aside>
+      </section>
+
+      <!-- Natija -->
+      <section id="view-result" class="result" hidden>
+        <p class="eyebrow">Natija</p>
+        <h1 id="res-name"></h1>
+        <p class="badge" id="res-status" data-kind="ok"></p>
+        <div class="score-row">
+          <p class="score" id="res-score">0 / 0</p>
+          <dl class="res-facts">
+            <div><dt>To‘g‘ri javoblar</dt><dd id="res-pct">0%</dd></div>
+            <div><dt>Davomiyligi</dt><dd id="res-time">00:00</dd></div>
+            <div><dt>Chiqishlar</dt><dd id="res-viol">0</dd></div>
+          </dl>
+        </div>
+        <div class="card">
+          <h2 class="side-h">Hisobot</h2>
+          <pre class="report" id="res-report"></pre>
+        </div>
+        <p class="muted" id="res-sent" role="status" hidden></p>
+        <div class="row">
+          <button class="btn primary" id="res-copy" type="button">Hisobotni nusxalash</button>
+          <button class="btn" id="res-again" type="button">Bosh sahifaga qaytish</button>
+        </div>
+      </section>
+
+      <!-- O‘qituvchi -->
+      <section id="view-teacher" class="teacher" hidden>
+        <p class="eyebrow">O‘qituvchi uchun</p>
+        <h1>Natijalar</h1>
+        <form id="pin-form" class="card form narrow">
+          <label for="pin">PIN-kod</label>
+          <input id="pin" type="password" inputmode="numeric" autocomplete="off">
+          <p id="pin-error" class="error" role="alert" hidden>PIN noto‘g‘ri.</p>
+          <button class="btn primary" type="submit">Kirish</button>
+        </form>
+        <div id="t-panel" hidden>
+          <p class="muted">Bu ro‘yxatda faqat shu qurilmada topshirilgan testlar ko‘rinadi. Barcha qurilmalardan natija yig‘ish uchun README faylidagi «endpoint» sozlamasidan foydalaning.</p>
+          <div class="row">
+            <button class="btn primary" id="t-copy" type="button">CSV nusxalash</button>
+            <button class="btn" id="t-clear" type="button" data-armed="0">Hammasini tozalash</button>
+            <button class="btn" id="t-lock" type="button">Chiqish</button>
+          </div>
+          <p class="muted" id="t-empty" hidden>Hozircha natijalar yo‘q.</p>
+          <div class="t-list" id="t-list"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="wrap foot">
+      <a href="#oqituvchi">O‘qituvchi uchun</a>
+    </footer>
+  </div>
+
+  <!-- Ogohlantirish: butun ekranni qoplaydi -->
+  <div id="alert" class="alert" role="alertdialog" aria-modal="true" aria-labelledby="alert-title" aria-describedby="alert-detail" hidden>
+    <div class="tape" aria-hidden="true"></div>
+    <div class="alert-card">
+      <p class="alert-kicker" id="alert-kicker"></p>
+      <h2 class="alert-title" id="alert-title"></h2>
+      <p class="alert-detail" id="alert-detail"></p>
+      <p class="alert-meta" id="alert-meta"></p>
+      <button class="btn alert-ok" id="alert-ok" type="button"></button>
+    </div>
+    <div class="tape" aria-hidden="true"></div>
+  </div>
+  <div id="toast" class="toast" role="status" hidden></div>
+
+  <script src="exam.js"></script>
+  <script src="util.js"></script>
+  <script src="guard.js"></script>
+  <script src="teacher.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
